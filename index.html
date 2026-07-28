@@ -364,7 +364,7 @@
                         <h2 id="booking-title">Reserve sua experiência no Velaris</h2>
                     </div>
 
-                    <form class="booking-form" action="#" method="POST" id="reservation-form">
+                    <form class="booking-form" id="reservation-form" onsubmit="event.preventDefault();">
                         <div class="form-group">
                             <label for="checkin">Check-in</label>
                             <input type="date" id="checkin" name="checkin" class="form-control" required>
@@ -391,7 +391,6 @@
                                 <option value="penthouse">Penthouse Velaris</option>
                             </select>
                         </div>
-
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary">
                                 Confirmar Reserva
@@ -402,6 +401,12 @@
             </div>
         </section>
     </main>
+
+    <footer class="footer bg-secondary">
+        <div class="container text-center">
+            <p>&copy; 2026 Hotel Velaris. Todos os direitos reservados.</p>
+        </div>
+    </footer>
 
     <script src="js/script.js" defer></script>
 </body>

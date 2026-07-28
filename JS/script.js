@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mobileToggle && navMenu) {
         mobileToggle.addEventListener('click', () => {
             const isExpanded = mobileToggle.getAttribute('aria-expanded') === 'true';
-            mobileToggle.setAttribute('aria-expanded', !isExpanded);
+            mobileToggle.setAttribute('aria-expanded', String(!isExpanded));
             navMenu.classList.toggle('active');
             mobileToggle.classList.toggle('active');
         });
@@ -39,23 +39,30 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /* ==========================================================================
-       2. SCROLL SUAVE PARA LINKS INTERNOS
+       2. SCROLL SUAVE PARA LINKS INTERNOS (Com tratamento de erro)
        ========================================================================== */
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             const targetId = this.getAttribute('href');
-            if (targetId === '#') return;
+            
+            // Ignora se for apenas '#' ou vazio
+            if (!targetId || targetId === '#') return;
 
-            const targetElement = document.querySelector(targetId);
-            if (targetElement) {
-                e.preventDefault();
-                const navHeight = navbar ? navbar.offsetHeight : 0;
-                const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - navHeight;
+            try {
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    e.preventDefault();
+                    const navHeight = navbar ? navbar.offsetHeight : 0;
+                    const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - navHeight;
 
-                window.scrollTo({
-                    top: targetPosition,
-                    behavior: 'smooth'
-                });
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            } catch (err) {
+                // Previne crash caso o seletor seja inválido
+                console.warn(`Seletor inválido para scroll suave: ${targetId}`);
             }
         });
     });
@@ -89,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const galleryItems = document.querySelectorAll('.gallery-item img');
     galleryItems.forEach(img => {
         img.addEventListener('click', () => {
-            // Suporte para visualização/ampliação
+            // Espaço reservado para ampliação/lightbox futuro
         });
     });
 
@@ -103,8 +110,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const checkoutInput = document.getElementById('checkout');
         const submitBtn = bookingForm.querySelector('button[type="submit"]');
 
-        // Configura a data mínima de check-in para a data atual
-        const todayStr = new Date().toISOString().split('T')[0];
+        // Formatação precisa da data local (YYYY-MM-DD) sem problemas de fuso horário UTC
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const todayStr = `${year}-${month}-${day}`;
+
         if (checkinInput) {
             checkinInput.min = todayStr;
         }
@@ -123,7 +135,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Evento de Submissão
         bookingForm.addEventListener('submit', (e) => {
-            // EVITA O RECARREGAMENTO DA PÁGINA
             e.preventDefault();
 
             clearFormErrors(bookingForm);
@@ -171,13 +182,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Simulação de processamento (1.8 segundos)
                 setTimeout(() => {
-                    // Restaura o botão
                     submitBtn.disabled = false;
                     submitBtn.style.cursor = '';
                     submitBtn.style.opacity = '';
                     submitBtn.innerHTML = originalBtnContent;
 
-                    // Exibe a mensagem sem apagar os dados preenchidos no formulário
                     showSuccessFeedback(bookingForm);
                 }, 1800);
             }
@@ -221,7 +230,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const feedback = document.createElement('div');
         feedback.className = 'booking-success-message';
-        // Garante ocupar a largura total caso o formulário seja um CSS Grid horizontal
         feedback.style.gridColumn = '1 / -1';
         feedback.style.width = '100%';
         feedback.style.marginTop = '24px';
